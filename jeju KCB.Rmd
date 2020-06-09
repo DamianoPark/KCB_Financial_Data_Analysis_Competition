@@ -1,0 +1,401 @@
+---
+title: "외면 받은 제주 ,제주 실리콘 벨리 "
+
+output: html_document
+---
+```{r include=FALSE}
+knitr::opts_chunk$set(warning = F,message = F)
+```
+```{r include=FALSE}
+
+library(ggplot2)
+library(tidyverse)
+
+library(plotly)
+
+jejudata <- read.csv('C:/Users/Damiano/Desktop/kcb 공모전/jeju_financial_life_data.csv',header=T, stringsAsFactors=F)
+jejudata %>% head
+
+jejudata$medium_resid_rat <- ifelse(jejudata$medium_resid_rat == '-999999',NA,jejudata$medium_resid_rat)
+jejudata$large_resid_rat <- ifelse(jejudata$large_resid_rat == '-999999',NA,jejudata$large_resid_rat)
+
+
+#제주 연령별 소득과 소득 소비 상관 
+jejudata <- jejudata %>%  mutate(age_cat = ifelse(jejudata$age ==24,'0020',
+                                                  ifelse(jejudata$age %in% c(29:39),'2030',
+                                                    ifelse(jejudata$age %in% c(44:59),'4050',
+                                                        ifelse(jejudata$age %in% (60:79),'6070','8090') ) ) ))
+
+```
+#위기의 제주
+##한국의 실리콘밸리를 꿈꾸던 제주에 이상 징후가 감지되고 있다.  
+
+###제주는 한국, 중국, 일본의 중심에 있는 동북아시아 요충지이자 제주특별법을 기반으로 다른 지역과 차별화된 제도를 운영한다는 장점을 내세워 2000년대초부터 적극적으로 기업 유치에 나섰다.
+###하 지 만  '땅값·인재난'에 기업들은 제주를 외면하고 있다.  
+  
+###제주도의 땅값은 천정부지로 오르고 있다. 
+###제주도 주택가격의 변화를 살펴보자.  
+```{r include=FALSE}
+###############
+
+library(ggplot2)
+library(tidyverse)
+library(reshape)
+jeju_resid_data <- read.csv('C:/Users/Damiano/Desktop/kcb 공모전/평균매매가격_종합.csv',header=T, stringsAsFactors=F)
+str(jeju_resid_data)
+head(jeju_resid_data)
+
+start_date<-'2013-01-01'
+end_date <-'2019-05-01'
+
+date_set <-seq(as.Date(start_date), as.Date(end_date), by = "month")
+str(date_set)
+date_set <- as.character.Date(date_set)
+date_set <- as.vector(date_set)
+
+colnames(jeju_resid_data) <- c('지역',date_set)
+jeju_resid_data_melt <- melt(jeju_resid_data,id=c('지역'))
+jeju_resid_data_melt <- jeju_resid_data_melt %>% rename(c(variable='date',value='price'))
+
+
+jeju_resid_data_melt$date<-  as.Date(jeju_resid_data_melt$date, format="%Y-%m-%d")
+
+#제주도 지역 상승 
+jeju_resid_jeju <- jeju_resid_data_melt %>% filter(jeju_resid_data_melt$지역=='제주')
+jeju_resid_all <- jeju_resid_data_melt %>% filter(jeju_resid_data_melt$지역=='전국')
+jeju_resid_jeju_vs_all <- jeju_resid_data_melt %>% filter(jeju_resid_data_melt$지역==c('전국','제주'))
+```
+```{r echo=FALSE}
+
+# plot
+ggplot(jeju_resid_data_melt, aes(x=date,y=price, col=지역)) + 
+  geom_line()+ 
+  labs(title="Time Series of Price", 
+       subtitle="지역별 주택 가격", 
+       caption="Source: 통계청", 
+       color=NA) +  # title and caption
+  theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8),  # rotate x axis text
+        panel.grid.minor = element_blank())  # turn off minor grid
+
+
+ggplot(jeju_resid_jeju, aes(x=date,y=price, col=지역)) + 
+  geom_line()+ 
+  labs(title="Time Series of Price", 
+       subtitle="지역별 주택 가격", 
+       caption="Source: 통계청", 
+       color=NA) +  # title and caption
+  theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8),  # rotate x axis text
+        panel.grid.minor = element_blank())  # turn off minor grid
+
+ggplot(jeju_resid_all, aes(x=date,y=price, col=지역)) + 
+  geom_line()+ 
+  labs(title="Time Series of Price", 
+       subtitle="지역별 주택 가격", 
+       caption="Source: 통계청", 
+       color=NA) +  # title and caption
+  theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8),  # rotate x axis text
+        panel.grid.minor = element_blank())  # turn off minor grid
+
+
+ggplot(jeju_resid_jeju_vs_all, aes(x=date,y=price, col=지역)) + 
+  geom_line()+ 
+  labs(title="Time Series of Price", 
+       subtitle="지역별 주택 가격", 
+       caption="Source: 통계청", 
+       color=NA) +  # title and caption
+  theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8),  # rotate x axis text
+        panel.grid.minor = element_blank())  # turn off minor grid
+
+#전국 평균에 비해 제주도 집값 상승률이 매우 높음을 확인 할 수 있다 
+
+
+
+
+```
+  
+##제주도의 집값이 천정부지로 오르고 있음을 볼 수 있다.  
+
+####이렇게 나 높은 집값 상승률의 제주.  
+
+###인재와 부지 이 두가지 문제를 해결해 보자.
+
+  
+#인재 찾기
+##실제 경제 활동 인구중 어떠한 연령대가 가장 활발한 경제 활동력을 갖고있는지 확인해보자.  
+
+###*연령대 구분*  
+24세 이하 0020세대  
+25세이상 39세 이하 2030세대  
+40세이상 59세 이하 4050세대  
+60세이상 79세 이하 6070세대  
+80세이상 8090세대
+
+```{r , echo=FALSE}
+
+#제주 연령별 소득과 소득 소비 상관 
+jejudata <- jejudata %>%  mutate(age_cat = ifelse(jejudata$age ==24,'0020',
+                                                  ifelse(jejudata$age %in% c(29:39),'2030',
+                                                    ifelse(jejudata$age %in% c(44:59),'4050',
+                                                        ifelse(jejudata$age %in% (60:79),'6070','8090') ) ) ))
+```
+  
+##연령대별 소득*소비 그래프
+
+```{r , echo=FALSE}
+ 
+# Plot
+ggplot(jejudata, aes(x=avg_income, y=avg_spend , col=age_cat)) + 
+  geom_point(aes(col=age_cat)) +  # draw points
+  xlim(0,400000000) +
+  ylim(0,50000000)+
+  geom_smooth(method="loess", se=F) 
+
+```
+  
+Plot 을 보았을때 소득 대비 소비가 2030대에서 높은 것을 확인 할 수 있다.  
+소비가 활발 할 수록 경제에 플러스 요인이 된다고 볼 때,  
+2030의 소득대비 높은 소비는 2030의 경제적 잠재성이 크다는것을 볼 수 있다.  
+  
+##제주 실리콘 벨리의 부활을 위해선 기업 유치 뿐 만 아니라 이 기업에 근무할 인재 들이 필요하다.  
+##IT산업의 주요 인재이자 경제의 핵심이 되는 2030이 거주 할 수 있는  실리콘벨리 주택단지의 위치를 선정 해 보자  
+
+##직종별로 어느 지역에 많이 거주하는지 지도에 시각화를 해보겠다   
+#2030 대기업 재직 비율 탑100들의 거주지 지도 시각화 
+```{r include=F}
+
+    
+majorjob <- jejudata %>% filter(jejudata$age_cat==c('2030')) %>% arrange(desc(job_majorc)) %>% head(100)
+
+center <- c(mean(majorjob$x_axis), mean(majorjob$y_axis))
+
+library(ggmap)
+
+register_google('AIzaSyB0zoHBokriScSBi-9h448FYyRSqX9BMzk')
+
+#############실제 분석 )) 대기업 현직자 거주 지역 
+
+
+```
+
+
+```{r echo=F}
+
+qmap(location = center,
+     zoom = 10,
+     maptype = 'roadmap',
+     source = 'google') + 
+  geom_point(data = majorjob, 
+             aes(x = x_axis,
+                 y = y_axis), 
+             shape = '☆', 
+             color = 'blue', 
+             size = 4) 
+```
+  
+  
+##2030 중소기업 재직 비율 탑100의 거주지  
+```{r echo=F}
+
+smalljob <- jejudata %>% filter(jejudata$age_cat==c('2030') )%>% arrange(desc(job_smallc)) %>% head(100)
+
+center <- c(mean(smalljob$x_axis), mean(smalljob$y_axis))
+
+qmap(location = center,
+     zoom = 10,
+     maptype = 'roadmap',
+     source = 'google') + 
+  geom_point(data = smalljob, 
+             aes(x = x_axis,
+                 y = y_axis), 
+             shape = '☆', 
+             colour = 'green',
+             size = 4)
+
+
+```
+
+```{r include=F}
+house_price <- read.csv('C:/Users/Damiano/Desktop/kcb 공모전/주택가격.csv',header=T, stringsAsFactors=F)
+
+library(readxl)
+jeju_house_code <-read_xls('C:/Users/Damiano/Desktop/kcb 공모전/법정동코드 조회자료.xls')
+house_price$법정동코드<-as.character(house_price$법정동코드)
+
+
+jeju_price <- inner_join(house_price,jeju_house_code, by='법정동코드')
+
+
+jeju_price <- jeju_price[,-12]
+
+jeju_price <- jeju_price %>% filter(jeju_price$지목코드==8) #법정동코드가 8이 거주 
+
+for (i in 1:length(jeju_price$법정동명.x)) {
+ lonlat = geocode(jeju_price[i,"법정동명.x"], messaging = F) 
+ jeju_price$lon[i] = as.numeric(lonlat[1]) 
+ jeju_price$lat[i] = as.numeric(lonlat[2]) }
+#############################################
+
+
+
+
+```
+
+##제1사분위수이하의 평균 토지금액의 토지가 많이 위치하는 곳 지도 시각화   
+국가 토지금액 공공데이터에서 토지의 용도가 거주인 것들만 선택한 후  
+이들 중 가격이 1사분위수 이하인 것들만 추려 보았다.  
+```{r echo=F}
+jeju_price_low <- jeju_price %>%filter(jeju_price$평균토지금액<quantile(jeju_price$평균토지금액)[2])
+##############################################################
+################지도에 나타내기
+
+center <- c(mean(jeju_price_low$lon), mean(jeju_price_low$lat))
+
+qmap(location = center,
+     zoom = 10,
+     maptype = 'roadmap',
+     source = 'google') + 
+  stat_density_2d(data = jeju_price_low, 
+             aes(x = lon,
+                 y = lat,
+                 fill=..level..,
+                 alpha=..level..), geom='polygon', size=1, bins=5)+
+                  scale_fill_gradient(low='blue', high='red')
+```
+  
+##2030대 대기업*중소기업 재직 비율 높은 고객군과 제1사분위수 이하 주택가격 지도 겹쳐 보이기   
+```{r echo=F}  
+
+smalljob2030 <- jejudata %>% filter(jejudata$age_cat==c('2030') )%>% arrange(desc(job_smallc)) %>% head(100)
+
+majorjob2030 <- jejudata %>% filter(jejudata$age_cat==c('2030') )%>% arrange(desc(job_majorc)) %>% head(100)
+
+center <- c(mean(majorjob2030$x_axis), mean(majorjob2030$y_axis))
+
+
+qmap(location = center,
+     zoom = 10,
+     maptype = 'roadmap',
+     source = 'google') + 
+  stat_density_2d(data = jeju_price_low, 
+                  aes(x = lon,
+                      y = lat,
+                      fill=..level..,
+                      alpha=..level..), geom='polygon', size=0.5, bins=10)+
+  scale_fill_gradient(low='blue', high='red')+ 
+  geom_point(data = majorjob2030, 
+             aes(x = x_axis,
+                 y = y_axis), 
+             shape = '☆', 
+             colour = 'blue', 
+             size = 4)+ 
+  geom_point(data = smalljob2030, 
+             aes(x = x_axis,
+                 y = y_axis), 
+             shape = '☆', 
+             colour = 'green', 
+             size = 4) 
+```
+  
+파란색 별은 대기업 재직 비율이 높은 2030을 초록색 별은 중소기업 재직 비율이 높은 2030을 나타낸다.  
+토지 가격이 저렴하면서도 제주 현지 인력들이 가장 많이 거주하고 있는 지역의 위치 정보를 파악해 보면  
+첫번째, 거주자가 많은 제주시와 서귀포시에 가까워야 함
+두번째, 토지의 가격이 저렴해야함 
+  
+이 두가지 원칙으로 제주 실리콘벨리 주택단지 입지를 선정해 보겠다.
+  
+##입지 점수 가중치 계산
+###score = 토지가격 /(0.5x제주시까지 거리 + 0.2x서귀포시까지 거리 - 0.35x한라산에서의 거리)
+여기서 제주시인구 50만명 서귀포시 인구 20만명임을 반영하여 도심에서 거리와 주택평균가격을 점수화 한 score 변수 생성 
+```{r echo=F}
+
+#################################
+####거주 지역 선정 
+#1분위 수 이하의 주택가격을 갖고 있는 지역들의 평균 주택가격 구하기 
+jeju_price_low_mean <- jeju_price_low %>% group_by(법정동명.x,lon,lat) %>%summarise(지역별평균토지금액 = mean(평균토지금액))
+
+##########지도에 시각화 -
+
+jejusi <-geocode('제주특별자치도 제주시')
+seoguiposi <- geocode('제주특별자치도 서귀포시')
+hanlasan <- geocode('한라산국립공원')
+
+jeju_price_low_mean$dist <-  0.5*sqrt( (jeju_price_low_mean$lon-jejusi$lon)**2 + (jeju_price_low_mean$lat-jejusi$lat)**2 )+
+                              0.2*sqrt( (jeju_price_low_mean$lon-seoguiposi$lon)**2 + (jeju_price_low_mean$lat-seoguiposi$lat)**2 ) -
+                              0.35*sqrt((jeju_price_low_mean$lon-hanlasan$lon)**2 + (jeju_price_low_mean$lat-hanlasan$lat)**2 )
+
+score <- as.data.frame( scale(jeju_price_low_mean$지역별평균토지금액) ) 
+jeju_price_low_mean <- data.frame(jeju_price_low_mean,score)
+
+jeju_silicon_top10 <- jeju_price_low_mean %>% arrange(desc(V1)) %>% head(10)
+
+
+qmap(location = center,
+     zoom = 10,
+     maptype = 'roadmap',
+     source = 'google') + 
+  geom_point(data =jeju_silicon_top10, 
+             aes(x = lon,
+                 y = lat ),col='mediumvioletred',size=3)
+
+jeju_silicon_top10 
+```  
+
+  
+##제주 실리콘밸리 기업 입주 지역  선정  
+주택단지 선정 때와 달리 주택가격 데이터에서 토지 용도가 공장인것을 선택하였다.  
+
+```{r include=F}
+
+
+house_price <- read.csv('C:/Users/Damiano/Desktop/kcb 공모전/주택가격.csv',header=T, stringsAsFactors=F)
+jeju_house_code <-read_xls('C:/Users/Damiano/Desktop/kcb 공모전/법정동코드 조회자료.xls')
+as.data.frame(jeju_house_code)
+house_price$법정동코드<-as.character(house_price$법정동코드)
+
+
+jeju_price_raw <- inner_join(house_price,jeju_house_code, by='법정동코드')
+
+
+jeju_price_raw <- jeju_price_raw[,-12]
+
+jeju_cop_price <- jeju_price_raw %>% filter(jeju_price_raw$지목코드==9) #법정동코드가 9 공장용지
+
+for (i in 1:length(jeju_cop_price$법정동명.x)) {
+ lonlat = geocode(jeju_cop_price[i,"법정동명.x"], messaging = F) 
+ jeju_cop_price$lon[i] = as.numeric(lonlat[1]) 
+jeju_cop_price$lat[i] = as.numeric(lonlat[2]) }
+
+```
+
+```{r echo=F}
+jeju_cop_price_low <- jeju_cop_price %>% filter(jeju_cop_price$평균토지금액<quantile(jeju_cop_price$평균토지금액)[2])
+jeju_cop_price_low_mean <- jeju_cop_price_low %>% group_by(법정동명.x,lon,lat) %>%summarise(지역별평균토지금액 = mean(평균토지금액))
+
+
+
+
+jeju_cop_price_low_mean$dist <-  0.5*sqrt( (jeju_cop_price_low_mean$lon-jejusi$lon)**2 + (jeju_cop_price_low_mean$lat-jejusi$lat)**2 )+
+  0.2*sqrt( (jeju_cop_price_low_mean$lon-seoguiposi$lon)**2 + (jeju_cop_price_low_mean$lat-seoguiposi$lat)**2 ) -
+  0.35*sqrt((jeju_cop_price_low_mean$lon-hanlasan$lon)**2 + (jeju_cop_price_low_mean$lat-hanlasan$lat)**2 )
+#제주시와 서귀포시의 중심에서 얼마나 떨어져 있는지에 대한 SS (제주시 인구 50만, 서귀포시 인구 20만에 대한 가중치 부여 (인구수를 도시 인프라와 연ㄱ)  ;한라산 근처에 있으면 감점 요소 반영)
+score <- as.data.frame( scale(jeju_cop_price_low_mean$지역별평균토지금액) ) - as.data.frame( scale(jeju_cop_price_low_mean$dist) )
+
+
+jeju_cop_price_low_mean <- data.frame(jeju_cop_price_low_mean,score)
+
+jeju_cop_silicon_top10 <- jeju_cop_price_low_mean %>% arrange(desc(V1)) %>% head(10)
+
+
+qmap(location = center,
+     zoom = 10,
+     maptype = 'roadmap',
+     source = 'google') + 
+  geom_point(data =jeju_cop_silicon_top10, 
+             aes(x = lon,
+                 y = lat ),col='deeppink',size=3)
+
+jeju_cop_silicon_top10
+```
+
+
+
